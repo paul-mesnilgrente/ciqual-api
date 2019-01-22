@@ -21,5 +21,7 @@ pip install -r requirements
 ## Launch project
 
 ```bash
+flask initdb admin
+flask initdb importxml
 flask run
 ```
