@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, Blueprint
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_login import LoginManager
@@ -12,7 +12,8 @@ from logging.handlers import RotatingFileHandler
 db = SQLAlchemy()
 migrate = Migrate()
 login = LoginManager()
-api = Api()
+api_bp = Blueprint('apibp', __name__)
+api = Api(api_bp)
 
 
 def create_app(config_class=Config):
@@ -23,11 +24,12 @@ def create_app(config_class=Config):
     db.init_app(app)
     migrate.init_app(app, db)
     login.init_app(app)
-    api.init_app(app)
+    # api.init_app(app)
 
 
-    from app.api import bp as api_bp
-    app.register_blueprint(api_bp, url_prefix='/api')
+    from app.api import bp as api_blueprint
+    app.register_blueprint(api_blueprint, url_prefix='/api')
+    app.register_blueprint(api_bp)
 
     if not app.debug:
         file_handler = RotatingFileHandler('logs/ciqual.log', maxBytes=10240,

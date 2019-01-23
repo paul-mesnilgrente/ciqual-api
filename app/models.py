@@ -1,8 +1,34 @@
 from app import db, login
 
+from flask import url_for
 from flask_login import UserMixin
 
 from werkzeug.security import generate_password_hash, check_password_hash
+
+
+class PaginatedAPIMixin(object):
+    @staticmethod
+    def to_collection_dict(query, page, per_page, endpoint, **kwargs):
+        resources = query.paginate(page, per_page, False)
+        data = {
+            'items': [item.to_dict() for item in resources.items],
+            '_meta': {
+                'page': page,
+                'per_page': per_page,
+                'total_pages': resources.pages,
+                'total_items': resources.total
+            },
+            '_links': {
+                'self': url_for(endpoint, page=page, per_page=per_page,
+                                **kwargs),
+                'next': url_for(endpoint, page=page + 1, per_page=per_page,
+                                **kwargs) if resources.has_next else None,
+                'prev': url_for(endpoint, page=page - 1, per_page=per_page,
+                                **kwargs) if resources.has_prev else None
+            }
+        }
+        return data
+
 
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -78,7 +104,7 @@ class SubSubGroup(db.Model):
         return str(self.code) + ': ' + self.name_en
 
 
-class Food(db.Model):
+class Food(PaginatedAPIMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name_fr = db.Column(db.String(256), index=True, unique=False)
     name_en = db.Column(db.String(256), index=True, unique=False)
@@ -86,6 +112,13 @@ class Food(db.Model):
     sub_sub_group_id = db.Column(db.Integer, db.ForeignKey('sub_sub_group.id'))
 
     food_components = db.relationship('FoodComponent', backref='food', lazy='dynamic')
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'name_fr': self.name_fr,
+            'name_en': self.name_en
+        }
 
     def __repr__(self):
         return str(self.id) + ': ' + self.name_en

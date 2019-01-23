@@ -21,7 +21,34 @@ pip install -r requirements
 ## Launch project
 
 ```bash
+# create an admin user
 flask initdb admin
+# import the xml data into an SQLite database
 flask initdb importxml
+# run the API
 flask run
+```
+
+## The API
+
+### Endpoints
+
+You have two languages available: english or fr. In these examples, we'll use english.
+
+```python
+# food
+get('/api/en/foods')
+get('/api/en/foods/<id>')
+
+# group
+get('/api/en/groups')
+get('/api/en/groups/<id>')
+
+# sub group
+get('/api/en/subgroup')
+get('/api/en/subgroup/<id>')
+
+# sub sub group
+get('/api/en/subsubgroup')
+get('/api/en/subsubgroup/<id>')
 ```
