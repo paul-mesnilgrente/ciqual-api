@@ -113,11 +113,40 @@ class Food(PaginatedAPIMixin, db.Model):
 
     food_components = db.relationship('FoodComponent', backref='food', lazy='dynamic')
 
-    def to_dict(self):
+    def to_dict_for_collection(self):
         return {
+            '_links': {
+                'details': url_for('api.get_food', id=self.id)
+            },
             'id': self.id,
             'name_fr': self.name_fr,
-            'name_en': self.name_en
+            'name_en': self.name_en,
+            # 'components': {
+            #     'Energie': {
+            #         'min': None,
+            #         'max': 35.0,
+            #         'quantity': '-'
+            #     }
+            # }
+        }
+
+    def to_dict(self):
+        components = [fc.to_dict() for fc in self.food_components]
+        return {
+            '_links': {
+                'details': url_for('api.get_food', id=self.id)
+            },
+            'id': self.id,
+            'name_fr': self.name_fr,
+            'name_en': self.name_en,
+            # 'components': {
+            #     'Energie': {
+            #         'min': None,
+            #         'max': 35.0,
+            #         'quantity': '-'
+            #     }
+            # }
+            'components': components
         }
 
     def __repr__(self):
@@ -134,6 +163,19 @@ class FoodComponent(db.Model):
     food_id = db.Column(db.Integer, db.ForeignKey('food.id'))
     component_id = db.Column(db.Integer, db.ForeignKey('component.id'))
     source_id = db.Column(db.Integer, db.ForeignKey('source.id'))
+
+    component = db.relationship('Component', foreign_keys=component_id)
+    source = db.relationship('Source', foreign_keys=source_id)
+
+    def to_dict(self):
+        return {
+            'name_fr': self.component.name_fr,
+            'name_en': self.component.name_en,
+            'min': self.min,
+            'max': self.max,
+            'quantity': self.quantity,
+            'trust_code': self.trust_code
+        }
 
     def __repr__(self):
         return 'Component(food_id={}, component_id={}, source_id={}, ' + \
