@@ -24,16 +24,22 @@ def get_food(id):
 
 @bp.route('/search/food/<string:local>/<string:name>', methods=['GET'])
 def search_food(local, name):
+    # local = request.args.get('local', 'en', type=str)
+    # name = request.args.get('name', type=str)
+    page = request.args.get('page', 1, type=int)
+    per_page = min(request.args.get('per_page', 10, type=int), 100)
+
     if local not in ['fr', 'en']:
         return bad_request('Wrong local, fr|en')
+    attrib = Food.name_en if local == 'en' else Food.name_fr
 
-    sql = "SELECT * FROM food WHERE name_{} like '%{}%'".format(local, name)
-    l = []
-    for row in db.engine.execute(sql):
-        food = Food(id=int(row[0]),
-                    name_fr=row[1],
-                    name_en=row[2],
-                    sub_sub_group_id=int(row[3])
-                )
-        l.append(food.to_dict_for_collection())
-    return jsonify(l)
+    data = Food.to_collection_dict(
+        Food.query.filter(attrib.like('%{}%'.format(name))),
+        page,
+        per_page,
+        'api.search_food',
+        local=local,
+        name=name
+    )
+
+    return jsonify(data)

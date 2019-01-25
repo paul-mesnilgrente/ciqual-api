@@ -11,7 +11,7 @@ class PaginatedAPIMixin(object):
     def to_collection_dict(query, page, per_page, endpoint, **kwargs):
         resources = query.paginate(page, per_page, False)
         data = {
-            'items': [item.to_dict() for item in resources.items],
+            'items': [item.to_dict_for_collection() for item in resources.items],
             '_meta': {
                 'page': page,
                 'per_page': per_page,
