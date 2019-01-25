@@ -3,7 +3,7 @@ from app.models import Group, SubGroup, SubSubGroup
 from app.models import Food, Component, FoodComponent
 from app.models import Source, User
 
-import xml.etree.ElementTree
+from xml.etree import ElementTree
 import os
 
 
@@ -25,14 +25,26 @@ def register(app):
 
     def import_groups():
         app.logger.info('Importing groups...')
-        e = xml.etree.ElementTree.parse('data/alim_grp_2017-11-21.xml').getroot()
+        e = ElementTree.parse('data/alim_grp_2017-11-21.xml').getroot()
         prev_group = None
         prev_sgroup = None
         prev_ssgroup = None
         for alim_grp in e.findall('ALIM_GRP'):
-            group = Group(id=int(alim_grp[0].text), name_fr=alim_grp[1].text, name_en=alim_grp[2].text)
-            sgroup = SubGroup(id=int(alim_grp[3].text), name_fr=alim_grp[4].text, name_en=alim_grp[5].text)
-            ssgroup = SubSubGroup(code=int(alim_grp[6].text), name_fr=alim_grp[7].text, name_en=alim_grp[8].text)
+            group = Group(
+                id=int(alim_grp[0].text),
+                name_fr=' '.join(alim_grp[1].text.split()),
+                name_en=' '.join(alim_grp[2].text.split())
+            )
+            sgroup = SubGroup(
+                id=int(alim_grp[3].text),
+                name_fr=' '.join(alim_grp[4].text.split()),
+                name_en=' '.join(alim_grp[5].text.split())
+            )
+            ssgroup = SubSubGroup(
+                code=int(alim_grp[6].text),
+                name_fr=' '.join(alim_grp[7].text.split()),
+                name_en=' '.join(alim_grp[8].text.split())
+            )
 
             if group != prev_group:
                 prev_group = group
@@ -49,12 +61,12 @@ def register(app):
 
     def import_foods():
         app.logger.info('Importing foods...')
-        e = xml.etree.ElementTree.parse('data/alim_2017-11-21.xml').getroot()
+        e = ElementTree.parse('data/alim_2017-11-21.xml').getroot()
         for e_food in e.findall('ALIM'):
             food = Food(
                 id=int(e_food[0].text),
-                name_fr=e_food[1].text,
-                name_en=e_food[3].text,
+                name_fr=' '.join(e_food[1].text.split()),
+                name_en=' '.join(e_food[3].text.split()),
                 sub_sub_group_id=int(e_food[7].text)
             )
             db.session.add(food)
@@ -63,12 +75,12 @@ def register(app):
 
     def import_components():
         app.logger.info('Importing components...')
-        e = xml.etree.ElementTree.parse('data/const_2017-11-21.xml').getroot()
+        e = ElementTree.parse('data/const_2017-11-21.xml').getroot()
         for e_component in e.findall('CONST'):
             component = Component(
                 id=int(e_component[0].text),
-                name_fr=e_component[1].text,
-                name_en=e_component[2].text,
+                name_fr=' '.join(e_component[1].text.split()),
+                name_en=' '.join(e_component[2].text.split()),
             )
             db.session.add(component)
         db.session.commit()
@@ -76,11 +88,12 @@ def register(app):
 
     def import_sources():
         app.logger.info('Importing sources...')
-        e = xml.etree.ElementTree.parse('data/sources_2017-11-21.xml').getroot()
+        e = ElementTree.parse('data/sources_2017-11-21.xml').getroot()
         for e_source in e.findall('SOURCES'):
+            ref = ' '.join(e_source[1].text.split()) if e_source[1].text else None
             source = Source(
                 code=int(e_source[0].text),
-                ref_citation=e_source[1].text
+                ref_citation=ref
             )
             db.session.add(source)
         db.session.commit()
@@ -88,13 +101,13 @@ def register(app):
 
     def import_food_component():
         app.logger.info('Importing food components...')
-        root = xml.etree.ElementTree.parse('data/compo_2017-11-21.xml').getroot()
+        root = ElementTree.parse('data/compo_2017-11-21.xml').getroot()
         for e in root.findall('COMPO'):
             food_component = FoodComponent(
-                quantity = e[2].text,
+                quantity = ' '.join(e[2].text.split()),
                 min = float(e[3].text.replace(',', '.')) if e[3].text else None,
                 max = float(e[4].text.replace(',', '.')) if e[4].text else None,
-                trust_code = e[5].text if e[5].text else None,
+                trust_code = ' '.join(e[5].text.split()) if e[5].text else None,
 
                 food_id = int(e[0].text),
                 component_id = int(e[1].text),
@@ -114,7 +127,7 @@ def register(app):
 
 
     def empty_table(Table):
-        app.logger.info('Deleting the table "{}" content'.format(Table.__name__))
+        app.logger.info('Deleting the "{}" table content'.format(Table.__name__))
         for row in Table.query.all():
             db.session.delete(row)
         db.session.commit()
