@@ -33,22 +33,21 @@ flask run
 
 ### Endpoints
 
-You have two languages available: english or fr. In these examples, we'll use english.
-
 ```python
 # food
-get('/api/en/foods')
-get('/api/en/foods/<id>')
+get('/api/foods')
+get('/api/foods/<id>')
+get('/search/food/<string:local>/<string:name>')
 
 # group
-get('/api/en/groups')
-get('/api/en/groups/<id>')
+get('/api/groups')
+get('/api/groups/<id>')
 
 # sub group
-get('/api/en/subgroup')
-get('/api/en/subgroup/<id>')
+get('/api/sgroup')
+get('/api/sgroup/<id>')
 
 # sub sub group
-get('/api/en/subsubgroup')
-get('/api/en/subsubgroup/<id>')
+get('/api/ssgroup')
+get('/api/ssgroup/<id>')
 ```
