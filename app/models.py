@@ -168,8 +168,10 @@ class Food(PaginatedAPIMixin, db.Model):
             '_links': {
                 'details': url_for('api.get_food', id=self.id),
                 'group': url_for('api.get_group', id=self.group.id),
-                'sub_group': url_for('api.get_sgroup', id=self.sgroup.id),
+                'sub_group': url_for('api.get_sgroup', id=self.sgroup.id)
+                    if self.sgroup else None,
                 'sub_sub_group': url_for('api.get_ssgroup', id=self.ssgroup.id)
+                    if self.ssgroup else None
             },
             'id': self.id,
             'name_fr': self.name_fr,
@@ -189,8 +191,10 @@ class Food(PaginatedAPIMixin, db.Model):
             '_links': {
                 'self': url_for('api.get_food', id=self.id),
                 'group': url_for('api.get_group', id=self.group.id),
-                'sub_group': url_for('api.get_sgroup', id=self.sgroup.id),
+                'sub_group': url_for('api.get_sgroup', id=self.sgroup.id)
+                    if self.sgroup else None,
                 'sub_sub_group': url_for('api.get_ssgroup', id=self.ssgroup.id)
+                    if self.ssgroup else None
             },
             'id': self.id,
             'name_fr': self.name_fr,
