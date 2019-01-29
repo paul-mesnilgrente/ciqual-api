@@ -7,6 +7,10 @@ from werkzeug.security import generate_password_hash, check_password_hash
 
 
 class PaginatedAPIMixin(object):
+
+    def to_dict_for_collection(self):
+        return self.to_dict()
+
     @staticmethod
     def to_collection_dict(query, page, per_page, endpoint, **kwargs):
         resources = query.paginate(page, per_page, False)
@@ -51,7 +55,7 @@ def load_user(id):
     return User.query.get(int(id))
 
 
-class Group(db.Model):
+class Group(PaginatedAPIMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name_fr = db.Column(db.String(256), index=True, unique=True)
     name_en = db.Column(db.String(256), index=True, unique=True)
@@ -78,7 +82,7 @@ class Group(db.Model):
         return str(self.id) + ': ' + self.name_en
 
 
-class SubGroup(db.Model):
+class SubGroup(PaginatedAPIMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name_fr = db.Column(db.String(256), index=True, unique=True)
     name_en = db.Column(db.String(256), index=True, unique=True)
@@ -109,7 +113,7 @@ class SubGroup(db.Model):
         return str(self.id) + ': ' + self.name_en
 
 
-class SubSubGroup(db.Model):
+class SubSubGroup(PaginatedAPIMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name_fr = db.Column(db.String(256), index=True, unique=False)
     name_en = db.Column(db.String(256), index=True, unique=False)
