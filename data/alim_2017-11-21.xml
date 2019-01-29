@@ -3517,7 +3517,7 @@
       <alim_nom_eng> Foie gras, block (average) </alim_nom_eng>
       <alim_nom_index_eng> Foie gras, block (average) </alim_nom_index_eng>
       <alim_grp_code> 04 </alim_grp_code>
-      <alim_ssgrp_code> 040 </alim_ssgrp_code>
+      <alim_ssgrp_code> 0403 </alim_ssgrp_code>
       <alim_ssssgrp_code> 040308 </alim_ssssgrp_code>
    </ALIM>
    <ALIM>
@@ -11097,7 +11097,7 @@
       <alim_nom_eng> Rice-based drink, plain </alim_nom_eng>
       <alim_nom_index_eng> Rice-based drink, plain </alim_nom_index_eng>
       <alim_grp_code> 06 </alim_grp_code>
-      <alim_ssgrp_code> 0600 </alim_ssgrp_code>
+      <alim_ssgrp_code> 0602 </alim_ssgrp_code>
       <alim_ssssgrp_code> 060205 </alim_ssssgrp_code>
    </ALIM>
    <ALIM>

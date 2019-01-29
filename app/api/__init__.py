@@ -4,4 +4,4 @@ from flask_restful import Resource
 
 bp = Blueprint('api', __name__)
 
-from app.api import food, users, errors
+from app.api import food, groups, users, errors

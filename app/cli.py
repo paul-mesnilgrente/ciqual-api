@@ -37,11 +37,13 @@ def register(app):
             )
             sgroup = SubGroup(
                 id=int(alim_grp[3].text),
+                group_id=int(alim_grp[0].text),
                 name_fr=' '.join(alim_grp[4].text.split()),
                 name_en=' '.join(alim_grp[5].text.split())
             )
             ssgroup = SubSubGroup(
-                code=int(alim_grp[6].text),
+                id=int(alim_grp[6].text),
+                sub_group_id=int(alim_grp[3].text),
                 name_fr=' '.join(alim_grp[7].text.split()),
                 name_en=' '.join(alim_grp[8].text.split())
             )
@@ -56,18 +58,25 @@ def register(app):
                 db.session.commit()
             if ssgroup != prev_ssgroup:
                 prev_ssgroup = ssgroup
-                db.session.add(prev_ssgroup)
-                db.session.commit()
+                if ssgroup.id != 0:
+                    db.session.add(prev_ssgroup)
+                    db.session.commit()
+
 
     def import_foods():
         app.logger.info('Importing foods...')
         e = ElementTree.parse('data/alim_2017-11-21.xml').getroot()
         for e_food in e.findall('ALIM'):
+            group = Group.query.filter_by(id=int(e_food[5].text)).first()
+            sgroup = SubGroup.query.filter_by(id=int(e_food[6].text)).first()
+            ssgroup = SubSubGroup.query.filter_by(id=int(e_food[7].text)).first()
             food = Food(
                 id=int(e_food[0].text),
                 name_fr=' '.join(e_food[1].text.split()),
                 name_en=' '.join(e_food[3].text.split()),
-                sub_sub_group_id=int(e_food[7].text)
+                group_id=group.id if group else None,
+                sub_group_id=sgroup.id if sgroup else None,
+                sub_sub_group_id=ssgroup.id if ssgroup else None
             )
             db.session.add(food)
         db.session.commit()

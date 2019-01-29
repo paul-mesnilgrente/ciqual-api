@@ -56,7 +56,18 @@ class Group(db.Model):
     name_fr = db.Column(db.String(256), index=True, unique=True)
     name_en = db.Column(db.String(256), index=True, unique=True)
     
-    sub_groups = db.relationship('SubGroup', backref='group', lazy='dynamic')
+    sgroups = db.relationship('SubGroup', back_populates='group')
+    foods = db.relationship('Food', back_populates='group')
+
+    def to_dict(self):
+        return {
+            '_links': {
+                'self': url_for('api.get_group', id=self.id)
+            },
+            'id': self.id,
+            'name_en': self.name_en,
+            'name_fr': self.name_fr
+        }
 
     def __eq__(self, other):
         if other == None:
@@ -71,10 +82,23 @@ class SubGroup(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name_fr = db.Column(db.String(256), index=True, unique=True)
     name_en = db.Column(db.String(256), index=True, unique=True)
-    
+
     group_id = db.Column(db.Integer, db.ForeignKey('group.id'))
     
-    sub_sub_group = db.relationship('SubSubGroup', backref='sub_group', lazy='dynamic')
+    group = db.relationship('Group', back_populates='sgroups')
+    ssgroups = db.relationship('SubSubGroup', back_populates='sgroup')
+    foods = db.relationship('Food', back_populates='sgroup')
+
+    def to_dict(self):
+        return {
+            '_links': {
+                'self': url_for('api.get_sgroup', id=self.id),
+                'group': url_for('api.get_group', id=self.group.id)
+            },
+            'id': self.id,
+            'name_en': self.name_en,
+            'name_fr': self.name_fr
+        }
 
     def __eq__(self, other):
         if other == None:
@@ -87,13 +111,25 @@ class SubGroup(db.Model):
 
 class SubSubGroup(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    code = db.Column(db.Integer)
     name_fr = db.Column(db.String(256), index=True, unique=False)
     name_en = db.Column(db.String(256), index=True, unique=False)
     
     sub_group_id = db.Column(db.Integer, db.ForeignKey('sub_group.id'))
 
-    foods = db.relationship('Food', backref='sub_sub_group', lazy='dynamic')
+    sgroup = db.relationship('SubGroup', back_populates='ssgroups')
+    foods = db.relationship('Food', back_populates='ssgroup')
+
+    def to_dict(self):
+        return {
+            '_links': {
+                'self': url_for('api.get_ssgroup', id=self.id),
+                'sgroup': url_for('api.get_sgroup', id=self.sgroup.id),
+                'group': url_for('api.get_sgroup', id=self.sgroup.group.id)
+            },
+            'id': self.id,
+            'name_en': self.name_en,
+            'name_fr': self.name_fr
+        }
 
     def __eq__(self, other):
         if other == None:
@@ -101,7 +137,12 @@ class SubSubGroup(db.Model):
         return self.id == other.id
 
     def __repr__(self):
-        return str(self.code) + ': ' + self.name_en
+        return '{}/{}/{}: {}'.format(
+            self.id,
+            self.sgroup.id,
+            self.sgroup.group.id,
+            self.name_en
+        )
 
 
 class Food(PaginatedAPIMixin, db.Model):
@@ -109,14 +150,22 @@ class Food(PaginatedAPIMixin, db.Model):
     name_fr = db.Column(db.String(256), index=True, unique=False)
     name_en = db.Column(db.String(256), index=True, unique=False)
 
+    group_id = db.Column(db.Integer, db.ForeignKey('group.id'))
+    sub_group_id = db.Column(db.Integer, db.ForeignKey('sub_group.id'))
     sub_sub_group_id = db.Column(db.Integer, db.ForeignKey('sub_sub_group.id'))
 
+    group = db.relationship('Group', back_populates='foods')
+    sgroup = db.relationship('SubGroup', back_populates='foods')
+    ssgroup = db.relationship('SubSubGroup', back_populates='foods')
     food_components = db.relationship('FoodComponent', backref='food', lazy='dynamic')
 
     def to_dict_for_collection(self):
         return {
             '_links': {
-                'details': url_for('api.get_food', id=self.id)
+                'details': url_for('api.get_food', id=self.id),
+                'group': url_for('api.get_group', id=self.group.id),
+                'sub_group': url_for('api.get_sgroup', id=self.sgroup.id),
+                'sub_sub_group': url_for('api.get_ssgroup', id=self.ssgroup.id)
             },
             'id': self.id,
             'name_fr': self.name_fr,
@@ -134,7 +183,10 @@ class Food(PaginatedAPIMixin, db.Model):
         components = [fc.to_dict() for fc in self.food_components]
         return {
             '_links': {
-                'details': url_for('api.get_food', id=self.id)
+                'self': url_for('api.get_food', id=self.id),
+                'group': url_for('api.get_group', id=self.group.id),
+                'sub_group': url_for('api.get_sgroup', id=self.sgroup.id),
+                'sub_sub_group': url_for('api.get_ssgroup', id=self.ssgroup.id)
             },
             'id': self.id,
             'name_fr': self.name_fr,

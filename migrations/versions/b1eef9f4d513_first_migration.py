@@ -1,8 +1,8 @@
-"""add of groups food and compo and source
+"""first migration
 
-Revision ID: 4870e1f7a7f1
-Revises: 0fc23ec555f4
-Create Date: 2019-01-22 19:48:50.835360
+Revision ID: b1eef9f4d513
+Revises: 
+Create Date: 2019-01-30 00:23:12.084445
 
 """
 from alembic import op
@@ -10,8 +10,8 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '4870e1f7a7f1'
-down_revision = '0fc23ec555f4'
+revision = 'b1eef9f4d513'
+down_revision = None
 branch_labels = None
 depends_on = None
 
@@ -36,10 +36,20 @@ def upgrade():
     op.create_index(op.f('ix_group_name_fr'), 'group', ['name_fr'], unique=True)
     op.create_table('source',
     sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('code', sa.Integer(), nullable=True),
     sa.Column('ref_citation', sa.String(length=256), nullable=True),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_source_ref_citation'), 'source', ['ref_citation'], unique=False)
+    op.create_table('user',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('username', sa.String(length=64), nullable=True),
+    sa.Column('email', sa.String(length=120), nullable=True),
+    sa.Column('password_hash', sa.String(length=128), nullable=True),
+    sa.PrimaryKeyConstraint('id')
+    )
+    op.create_index(op.f('ix_user_email'), 'user', ['email'], unique=True)
+    op.create_index(op.f('ix_user_username'), 'user', ['username'], unique=True)
     op.create_table('sub_group',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('name_fr', sa.String(length=256), nullable=True),
@@ -64,17 +74,21 @@ def upgrade():
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('name_fr', sa.String(length=256), nullable=True),
     sa.Column('name_en', sa.String(length=256), nullable=True),
+    sa.Column('group_id', sa.Integer(), nullable=True),
+    sa.Column('sub_group_id', sa.Integer(), nullable=True),
     sa.Column('sub_sub_group_id', sa.Integer(), nullable=True),
+    sa.ForeignKeyConstraint(['group_id'], ['group.id'], ),
+    sa.ForeignKeyConstraint(['sub_group_id'], ['sub_group.id'], ),
     sa.ForeignKeyConstraint(['sub_sub_group_id'], ['sub_sub_group.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
-    op.create_index(op.f('ix_food_name_en'), 'food', ['name_en'], unique=True)
-    op.create_index(op.f('ix_food_name_fr'), 'food', ['name_fr'], unique=True)
+    op.create_index(op.f('ix_food_name_en'), 'food', ['name_en'], unique=False)
+    op.create_index(op.f('ix_food_name_fr'), 'food', ['name_fr'], unique=False)
     op.create_table('food_component',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('min', sa.Float(), nullable=True),
     sa.Column('max', sa.Float(), nullable=True),
-    sa.Column('quantity', sa.Float(), nullable=True),
+    sa.Column('quantity', sa.String(length=5), nullable=True),
     sa.Column('trust_code', sa.CHAR(), nullable=True),
     sa.Column('food_id', sa.Integer(), nullable=True),
     sa.Column('component_id', sa.Integer(), nullable=True),
@@ -99,6 +113,9 @@ def downgrade():
     op.drop_index(op.f('ix_sub_group_name_fr'), table_name='sub_group')
     op.drop_index(op.f('ix_sub_group_name_en'), table_name='sub_group')
     op.drop_table('sub_group')
+    op.drop_index(op.f('ix_user_username'), table_name='user')
+    op.drop_index(op.f('ix_user_email'), table_name='user')
+    op.drop_table('user')
     op.drop_index(op.f('ix_source_ref_citation'), table_name='source')
     op.drop_table('source')
     op.drop_index(op.f('ix_group_name_fr'), table_name='group')
