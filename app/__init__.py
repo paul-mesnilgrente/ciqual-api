@@ -30,6 +30,9 @@ def create_app(config_class=Config):
     app.register_blueprint(api_blueprint, url_prefix='/api')
     app.register_blueprint(api_bp)
 
+    from app.errors import bp as errors_bp
+    app.register_blueprint(errors_bp)
+
     if not app.debug:
         file_handler = RotatingFileHandler('logs/ciqual.log', maxBytes=10240,
                                            backupCount=10)

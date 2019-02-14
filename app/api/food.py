@@ -9,6 +9,7 @@ from app.api import bp
 from app.api.errors import error_response, bad_request
 
 
+@bp.route('/', methods=['GET'])
 @bp.route('/foods', methods=['GET'])
 def get_foods():
     page = request.args.get('page', 1, type=int)
