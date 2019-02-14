@@ -66,7 +66,8 @@ class Group(PaginatedAPIMixin, db.Model):
     def to_dict(self):
         return {
             '_links': {
-                'self': url_for('api.get_group', id=self.id)
+                'self': url_for('api.get_group', id=self.id),
+                'sub_groups': url_for("api.get_group_sgroups", id=self.id)
             },
             'id': self.id,
             'name_en': self.name_en,
@@ -97,7 +98,10 @@ class SubGroup(PaginatedAPIMixin, db.Model):
         return {
             '_links': {
                 'self': url_for('api.get_sgroup', id=self.id),
-                'group': url_for('api.get_group', id=self.group.id)
+                'group': url_for('api.get_group', id=self.group.id),
+                'ssgroups': url_for('api.get_group_sgroups_ssgroups',
+                    group_id=self.group_id,
+                    sgroup_id=self.id)
             },
             'id': self.id,
             'name_en': self.name_en,
@@ -128,7 +132,7 @@ class SubSubGroup(PaginatedAPIMixin, db.Model):
             '_links': {
                 'self': url_for('api.get_ssgroup', id=self.id),
                 'sgroup': url_for('api.get_sgroup', id=self.sgroup.id),
-                'group': url_for('api.get_sgroup', id=self.sgroup.group.id)
+                'group': url_for('api.get_group', id=self.sgroup.group.id)
             },
             'id': self.id,
             'name_en': self.name_en,

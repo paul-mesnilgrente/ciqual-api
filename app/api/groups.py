@@ -8,6 +8,9 @@ from app import db
 from app.api import bp
 from app.api.errors import error_response, bad_request
 
+"""
+GROUPS
+"""
 
 @bp.route('/groups', methods=['GET'])
 def get_groups():
@@ -21,6 +24,37 @@ def get_groups():
 def get_group(id):
     return jsonify(Group.query.get_or_404(id).to_dict())
 
+
+@bp.route('/groups/<int:id>/sgroups', methods=['GET'])
+def get_group_sgroups(id):
+    page = request.args.get('page', 1, type=int)
+    per_page = min(request.args.get('per_page', 10, type=int), 100)
+    data = SubGroup.to_collection_dict(
+        SubGroup.query.filter_by(group_id=id),
+        page,
+        per_page,
+        'api.get_group_sgroups',
+        id=id
+    )
+    return jsonify(data)
+
+@bp.route('/groups/<int:group_id>/sgroups/<int:sgroup_id>/ssgroups', methods=['GET'])
+def get_group_sgroups_ssgroups(group_id, sgroup_id):
+    page = request.args.get('page', 1, type=int)
+    per_page = min(request.args.get('per_page', 10, type=int), 100)
+    data = SubGroup.to_collection_dict(
+        SubSubGroup.query.filter_by(sub_group_id=sgroup_id),
+        page,
+        per_page,
+        'api.get_group_sgroups_ssgroups',
+        group_id=group_id,
+        sgroup_id=sgroup_id
+    )
+    return jsonify(data)
+
+"""
+SUB GROUPS
+"""
 
 @bp.route('/sgroups', methods=['GET'])
 def get_sgroups():
