@@ -238,7 +238,8 @@ class FoodComponent(db.Model):
             'min': self.min,
             'max': self.max,
             'quantity': self.quantity,
-            'trust_code': self.trust_code
+            'trust_code': self.trust_code,
+            'source': self.source.ref_citation if self.source else None
         }
 
     def __repr__(self):
